@@ -18,5 +18,7 @@ Route::get('/', function () {
 });
 
 Route::resource('post', 'PostController');
-
 Route::resource('rest', 'RestappController');
+
+
+Route::post('/post/send', 'PostController@send');

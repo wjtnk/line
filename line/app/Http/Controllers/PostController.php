@@ -17,7 +17,8 @@ class PostController extends Controller
     public function show($id)
     {
         $item = Post::find($id);
-        return $item->toArray();
+//        return $item->toArray();
+        return view('post.show', ['item' => $item]);
     }
 
     public function create()
@@ -48,4 +49,44 @@ class PostController extends Controller
     {
         //
     }
+
+    public function send(Request $request)
+    {
+        $post = Post::find($request->id);
+        $access_token = $_ENV['access_token'];
+        $user_id = $_ENV['user_id'];
+//ヘッダ設定
+        $header = array(
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $access_token
+        );
+
+        $message = array(
+            'type' => 'text',
+            'text' => $post->message
+        );
+
+        $body = json_encode(array(
+            'to' => $user_id,
+            'messages'   => array($message)
+        ));
+
+        $options = array(
+            CURLOPT_URL=> 'https://api.line.me/v2/bot/message/push',
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_HTTPHEADER     => $header,
+            CURLOPT_POSTFIELDS     => $body,
+            CURLOPT_RETURNTRANSFER => true
+        );
+
+
+        $curl = curl_init();
+        curl_setopt_array($curl, $options);
+        curl_exec($curl);
+        curl_close($curl);
+        return redirect('/post');
+    }
 }
+
+
+
